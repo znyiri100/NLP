@@ -1,0 +1,14 @@
+langchain
+langchain_community
+langchain_core
+langchain_openai
+matplotlib
+numpy
+openai
+pandas
+plotly
+pydantic
+scipy
+scikit-learn
+streamlit
+ipython
