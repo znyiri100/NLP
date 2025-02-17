@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -8,6 +9,16 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+=======
+# Byte-compiled Python files
+__pycache__/
+*.py[cod]
+# Virtual environments
+venv/
+ENV/
+env/
+# Distribution / packaging
+>>>>>>> 8036064 (Initial commit)
 build/
 develop-eggs/
 dist/
@@ -19,12 +30,16 @@ lib64/
 parts/
 sdist/
 var/
+<<<<<<< HEAD
 wheels/
 share/python-wheels/
+=======
+>>>>>>> 8036064 (Initial commit)
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
+<<<<<<< HEAD
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -171,6 +186,16 @@ cython_debug/
 .pypirc
 <<<<<<< HEAD
 
+=======
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+# Logs and databases
+*.log
+*.sqlite3
+>>>>>>> 8036064 (Initial commit)
 # streamlit
 .streamlit/
 =======
