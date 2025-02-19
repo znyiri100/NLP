@@ -12,18 +12,12 @@ from datetime import datetime
 from classify_charts import create_category_distribution_chart, create_embedding_projector
 
 def app():
+    # st.set_page_config(page_title="Word Classifier", layout="wide")
+    st.title("Classify Words")
+
     # Initialize results_df in session state if it doesn't exist
     if 'results_df' not in st.session_state:
         st.session_state.results_df = None
-
-    # Streamlit config and title
-    # st.set_page_config(page_title="Word Classifier", layout="wide")
-    # st.title("Word Classification")
-
-    #api_key = st.sidebar.text_input("Enter your OpenAI API key", type="password")
-    # api_key = 'sk-...'
-    # if api_key:
-    #     os.environ["OPENAI_API_KEY"] = api_key
 
     # Define topics
     topics = '''Travel and Transportation
@@ -54,16 +48,39 @@ def app():
     # Create parser
     parser = PydanticOutputParser(pydantic_object=WordCategory)
 
-    # file upload to sidebar
-    with st.sidebar:
-        #st.title("Configuration")
+    # # file upload to sidebar
+    # with st.sidebar:
+    #     #st.title("Configuration")
 
-        # File upload
-        uploaded_file = st.file_uploader("Upload your word list (txt file)", type="txt")
+    #     # File upload
+    #     uploaded_file = st.file_uploader("Upload your word list (txt file)", type="txt")
 
-    if uploaded_file:
-        # Read the uploaded file
-        df = pd.read_csv(uploaded_file, header=None, names=['word'])
+    # Input method selection
+    input_method = st.sidebar.radio("Select input method:", ("Word List", "File"))
+
+    word_list_df=pd.DataFrame()
+    default_word_list = [
+        "apple", "computer", "banana", "laptop", "orange", "smartphone",
+        "grape", "tablet", "mango", "keyboard", "pear", "mouse",
+        "strawberry", "printer", "blueberry", "monitor", "raspberry",
+        "server", "peach", "router", "house"
+    ]
+
+    if input_method == "Word List":
+        word_list_df=pd.DataFrame({'word': default_word_list})
+        st.session_state.results_df = None
+        # if word_list_input:
+        #     word_list = [word.strip() for word in word_list_input.replace(',', '\n').splitlines() if word.strip()]
+    else:
+        uploaded_file = st.sidebar.file_uploader("Upload file with one word per line:", type=["txt"])
+        if uploaded_file is not None:
+            try:
+                word_list_df = pd.read_csv(uploaded_file, names=['word'])
+            except Exception as e:
+                st.error(f"Error reading the file: {e}")
+        st.session_state.results_df = None
+        
+    if word_list_df.shape[0]>0:
 
         # Add word selection options in sidebar
         st.sidebar.subheader("Word Selection")
@@ -72,30 +89,30 @@ def app():
             ["First N words", "Random sample"]
         )
         
-        # Add slider for number of words to process
-        n_words = st.sidebar.slider(
-            "Number of words to process",
+        # Add input box for number of words to process
+        n_words = st.sidebar.number_input(
+            f"Words (max {word_list_df.shape[0]})",
             min_value=1,
-            max_value=df.shape[0],
-            value=min(10, df.shape[0])
+            max_value=word_list_df.shape[0],
+            value=min(10, word_list_df.shape[0]),
+            step=1
         )
         
         # Process words based on selection method
         if selection_method == "Random sample":
-            df2 = df.sample(n=n_words, random_state=42)
+            #word_list_df_selected = word_list_df.sample(n=n_words, random_state=42)
+            word_list_df_selected = word_list_df.sample(n=n_words)
         else:
-            df2 = df.head(n_words)
+            word_list_df_selected = word_list_df.head(n_words)
 
-    if uploaded_file:
-        
         # Create two columns for words and topics
         col1, col2 = st.columns(2)
         
         # Column 1: Display the words
         with col1:
-            editable_words = st.text_area("Edit words (one per line):", value='\n'.join(df2['word'].tolist()))
-            df2 = pd.DataFrame({'word': editable_words.split('\n')})
-            st.write(f"{df2.shape[0]} words")
+            editable_words = st.text_area("Edit words (one per line):", value='\n'.join(word_list_df_selected['word'].tolist()))
+            word_list_df_selected = pd.DataFrame({'word': editable_words.split('\n')})
+            st.write(f"{word_list_df_selected.shape[0]} words")
         
         # Column 2: Display and edit topics  
         with col2:
@@ -138,11 +155,11 @@ def app():
                 chain = prompt | llm | parser
                 
                 # Prepare batch inputs
-                word_list = df2.word.tolist()
+                word_list = word_list_df_selected.word.tolist()
                 inputs = [{"word": word, "topics": editable_topics} for word in word_list]
                 
                 # Process in batches
-                batch_size = max(df2.shape[0] // 10, 20)  # Ensure minimum batch size of 10
+                batch_size = max(word_list_df_selected.shape[0] // 10, 20)  # Ensure minimum batch size of 10
                 results = []
                 
                 start_time = time.time()
@@ -170,11 +187,6 @@ def app():
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
                 
-    # elif not api_key:
-    #     st.warning("Please enter your OpenAI API key in the sidebar.")
-    elif not uploaded_file:
-        st.info("Please upload a text file containing your word list.")
-
     def toggle_chart():
         st.session_state.show_chart = not st.session_state.show_chart
 
@@ -183,27 +195,27 @@ def app():
 
     # Initialize the states if they don't exist
     if 'show_chart' not in st.session_state:
-        st.session_state.show_chart = False
+        st.session_state.show_chart = True
     if 'show_chart2' not in st.session_state:
         st.session_state.show_chart2 = False
 
     # Create checkboxes with on_change handlers
     st.sidebar.checkbox(
-        "Category Distribution Chart",
+        "Plot Counts",
         value=st.session_state.show_chart,
         on_change=toggle_chart
     )
 
     st.sidebar.checkbox(
-        "3D Embedding Projector",
+        "Plot 3D",
         value=st.session_state.show_chart2,
         on_change=toggle_chart2
     )
 
-    if (uploaded_file and st.session_state.results_df is not None):
+    if (st.session_state.results_df is not None):
 
         # Create three columns for displaying results
-        col_counts, col_results, col_download = st.columns(3)
+        col_counts, col_results, col_download = st.columns([3,3,2])
         
         # Display category counts in left column
         with col_counts:

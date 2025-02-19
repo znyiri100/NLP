@@ -5,7 +5,7 @@ import classify
 
 # Sidebar for navigation
 #st.sidebar.title("Navigation")
-page = st.sidebar.radio("Pick something!", ["Home", "Cluster", "Classify"])
+page = st.sidebar.radio("Pick something!", ["Home", "Cluster", "Classify"], index=0)
 
 # Navigation logic
 if page == "Home":

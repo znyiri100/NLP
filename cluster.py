@@ -17,10 +17,10 @@ import plotly.express as px
 from cluster_helper import name_clusters, plot_3d, plot_2d, plot_dendrogram, kmeans_clustering, hierarchical_clustering
 
 def app():
-    st.title("Word Clustering Dashboard")
+    st.title("Cluster Words")
 
     # Input method selection
-    input_method = st.sidebar.radio("Select input method:", ("Word List", "CSV File"))
+    input_method = st.sidebar.radio("Select input method:", ("Word List", "File"))
 
     default_word_list = [
         "apple", "computer", "banana", "laptop", "orange", "smartphone",
@@ -34,26 +34,20 @@ def app():
         if word_list_input:
             word_list = [word.strip() for word in word_list_input.replace(',', '\n').splitlines() if word.strip()]
     else:
-        uploaded_file = st.sidebar.file_uploader("Upload a CSV file:", type=["csv"])
+        uploaded_file = st.sidebar.file_uploader("Upload file with one word per line:", type=["txt"])
         if uploaded_file is not None:
             try:
-                word_list_df = pd.read_csv(uploaded_file)
-                if 'word' in word_list_df.columns:
-                    word_list_input = word_list_df['word'].tolist()
-                    word_list_input = st.text_area("Enter words (comma-separated or one per line):", value=', '.join(word_list_input))
-                    if word_list_input:
-                        word_list = [word.strip() for word in word_list_input.replace(',', '\n').splitlines() if word.strip()]
-                    st.write(f'Uploaded file has {len(word_list)} words.')
-                else:
-                    st.error("The CSV file must have a 'word' column")
-                    word_list = []
+                word_list_df = pd.read_csv(uploaded_file, names=['word'])
+                word_list_input = st.text_area("Enter words (comma-separated or one per line):", value=', '.join(word_list_df['word'].to_list()))
+                if word_list_input:
+                    word_list = [word.strip() for word in word_list_input.replace(',', '\n').splitlines() if word.strip()]
             except Exception as e:
                 st.error(f"Error reading the file: {e}")
                 word_list = []
         else:
             word_list = []
-
-
+    st.write(f"{len(word_list)} words.")
+    
     # Clustering method selection
     clustering_method = st.sidebar.selectbox("Select Clustering Method:", ("KMeans", "Hierarchical"))
 
