@@ -240,7 +240,7 @@ def kmeans_clustering(word_list, num_clusters=3):
   word_embeddings = np.array(word_embeddings)
 
   # Check the dimension of the embeddings
-  print(f"OpenAI embeddings dimension: {word_embeddings.shape[1]}")
+  #print(f"OpenAI embeddings dimension: {word_embeddings.shape[1]}")
 
   # Step 3: Apply K-means clustering
   kmeans = KMeans(n_clusters=num_clusters, random_state=42, n_init=10)
