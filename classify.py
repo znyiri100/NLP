@@ -12,7 +12,7 @@ from datetime import datetime
 from classify_charts import create_category_distribution_chart, create_embedding_projector
 
 def app():
-    # st.set_page_config(page_title="Word Classifier", layout="wide")
+    #st.set_page_config(page_title="Word Classifier", layout="wide")
     st.title("Classify Words")
 
     # Initialize results_df in session state if it doesn't exist
@@ -21,24 +21,23 @@ def app():
 
     # Define topics
     topics = '''Travel and Transportation
-    Shopping and Money
-    Work and Professions
-    Hobbies
-    Environment and Weather
-    Education
-    Learning
-    Technology and Media
-    Food and Cooking
-    Housing and Furniture
-    Family and Traditions
-    Relationships
-    People
-    Behavior
-    Emotions
-    Interaction
-    Health
-    Fitness
-    '''
+Shopping and Money
+Work and Professions
+Hobbies
+Environment and Weather
+Education
+Learning
+Technology and Media
+Food and Cooking
+Housing and Furniture
+Family and Traditions
+Relationships
+People
+Behavior
+Emotions
+Interaction
+Health
+Fitness'''
 
     # Define the output schema
     class WordCategory(BaseModel):
@@ -59,7 +58,7 @@ def app():
     input_method = st.sidebar.radio("Select input method:", ("Word List", "File"))
 
     word_list_df=pd.DataFrame()
-    default_word_list = [
+    word_list_default = [
         "apple", "computer", "banana", "laptop", "orange", "smartphone",
         "grape", "tablet", "mango", "keyboard", "pear", "mouse",
         "strawberry", "printer", "blueberry", "monitor", "raspberry",
@@ -67,7 +66,7 @@ def app():
     ]
 
     if input_method == "Word List":
-        word_list_df=pd.DataFrame({'word': default_word_list})
+        word_list_df=pd.DataFrame({'word': word_list_default})
         st.session_state.results_df = None
         # if word_list_input:
         #     word_list = [word.strip() for word in word_list_input.replace(',', '\n').splitlines() if word.strip()]
@@ -83,7 +82,7 @@ def app():
     if word_list_df.shape[0]>0:
 
         # Add word selection options in sidebar
-        st.sidebar.subheader("Word Selection")
+        #st.sidebar.subheader("Word Selection")
         selection_method = st.sidebar.radio(
             "Select words by:",
             ["First N words", "Random sample"]
@@ -110,19 +109,45 @@ def app():
         
         # Column 1: Display the words
         with col1:
-            editable_words = st.text_area("Edit words (one per line):", value='\n'.join(word_list_df_selected['word'].tolist()))
-            word_list_df_selected = pd.DataFrame({'word': editable_words.split('\n')})
+            editable_words = st.text_area("Enter words (comma-separated or one per line):", value='\n'.join(word_list_df_selected['word'].tolist()))
+            word_list_df_selected = pd.DataFrame({'word': editable_words.replace(',', '\n').split('\n')})
             st.write(f"{word_list_df_selected.shape[0]} words")
         
         # Column 2: Display and edit topics  
         with col2:
             topics_list = topics.strip().split('\n')
-            editable_topics = st.text_area("Edit classes (one per line):", value=topics)
-            topics_list = editable_topics.strip().split('\n')
+            editable_topics = st.text_area("Enter words (comma-separated or one per line):", value=topics)
+            topics_list = editable_topics.replace(',', '\n').strip().split('\n')
             st.write(f"{len(topics_list)} classes")
 
+        def toggle_chart():
+            st.session_state.show_chart = not st.session_state.show_chart
+
+        def toggle_chart2():
+            st.session_state.show_chart2 = not st.session_state.show_chart2
+
+        # Initialize the states if they don't exist
+        if 'show_chart' not in st.session_state:
+            st.session_state.show_chart = True
+        if 'show_chart2' not in st.session_state:
+            st.session_state.show_chart2 = False
+
+        # Create checkboxes with on_change handlers
+        st.sidebar.checkbox(
+            "Plot Counts",
+            value=st.session_state.show_chart,
+            on_change=toggle_chart
+        )
+
+        st.sidebar.checkbox(
+            "Plot 3D",
+            value=st.session_state.show_chart2,
+            on_change=toggle_chart2
+        )
+
+
         # Button to start categorization
-        if st.button("Classify Words"):
+        if st.sidebar.button("Just do it!"):
             
             try:
                 # Initialize progress bar
@@ -187,35 +212,10 @@ def app():
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
                 
-    def toggle_chart():
-        st.session_state.show_chart = not st.session_state.show_chart
-
-    def toggle_chart2():
-        st.session_state.show_chart2 = not st.session_state.show_chart2
-
-    # Initialize the states if they don't exist
-    if 'show_chart' not in st.session_state:
-        st.session_state.show_chart = True
-    if 'show_chart2' not in st.session_state:
-        st.session_state.show_chart2 = False
-
-    # Create checkboxes with on_change handlers
-    st.sidebar.checkbox(
-        "Plot Counts",
-        value=st.session_state.show_chart,
-        on_change=toggle_chart
-    )
-
-    st.sidebar.checkbox(
-        "Plot 3D",
-        value=st.session_state.show_chart2,
-        on_change=toggle_chart2
-    )
-
     if (st.session_state.results_df is not None):
 
         # Create three columns for displaying results
-        col_counts, col_results, col_download = st.columns([3,3,2])
+        col_counts, col_results, col_download = st.columns([4,4,2])
         
         # Display category counts in left column
         with col_counts:

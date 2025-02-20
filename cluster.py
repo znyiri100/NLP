@@ -22,7 +22,7 @@ def app():
     # Input method selection
     input_method = st.sidebar.radio("Select input method:", ("Word List", "File"))
 
-    default_word_list = [
+    word_list_default = [
         "apple", "computer", "banana", "laptop", "orange", "smartphone",
         "grape", "tablet", "mango", "keyboard", "pear", "mouse",
         "strawberry", "printer", "blueberry", "monitor", "raspberry",
@@ -30,7 +30,7 @@ def app():
     ]
 
     if input_method == "Word List":
-        word_list_input = st.text_area("Enter words (comma-separated or one per line):", value=', '.join(default_word_list))
+        word_list_input = st.text_area("Enter words (comma-separated or one per line):", value=', '.join(word_list_default))
         if word_list_input:
             word_list = [word.strip() for word in word_list_input.replace(',', '\n').splitlines() if word.strip()]
     else:
@@ -63,7 +63,7 @@ def app():
         show_dendrogram = st.sidebar.checkbox("Show Dendrogram")
             
     # Run the selected clustering method
-    if st.sidebar.button("Let's Do It!"):
+    if st.sidebar.button("Let's do it!"):
         if word_list:  # Check if the word list is not empty
             if clustering_method == "KMeans":
                 clusters_df = kmeans_clustering(word_list, num_clusters)
