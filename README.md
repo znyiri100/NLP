@@ -1,6 +1,3 @@
-# NLP
-My NLP Adventures
-
 Recent advancements in LLMs enabled new ways to analyse text. We are constructing a reliable text classification pipeline using LLMs, emphasizing techniques like constrained generation, few-shot prompting, and dynamic example selection to enhance accuracy. The core idea is to democratize and streamline traditionally complex NLP tasks, making them accessible to a broader audience through LLMs.
 
 <strong>Topic Modeling, Named Entity Recognition (NER), Text Classification, and Clustering</strong> are all key natural language processing (NLP) techniques, but they serve different purposes.
