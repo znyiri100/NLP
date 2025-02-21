@@ -12,5 +12,3 @@ scipy
 scikit-learn
 streamlit
 ipython
-os
-
