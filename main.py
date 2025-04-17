@@ -1,10 +1,5 @@
 import streamlit as st
 import os
-#
-import intro
-import cluster
-import classify
-import topic_modeling
 
 st.set_page_config(page_title="NLP Experiments", layout="wide")
 
@@ -19,12 +14,15 @@ if openai_api_key is None:
 page = st.sidebar.radio("Pick something!", ["Intro", "Clustering", "Topic Modeling", "Classification"], index=0)
 st.sidebar.markdown("---")  # This creates a horizontal line separator in Streamlit
 
+# can run from within same folder or in nlp folder
+folder = 'nlp' if os.path.exists('nlp') else '.'
+
 # Navigation logic
 if page == "Intro":
-    intro.app()
+    exec(open(f"{folder}/intro.py").read())
 elif page == "Clustering":
-    cluster.app()
+    exec(open(f"{folder}/cluster.py").read())
 elif page == "Topic Modeling":
-    topic_modeling.app()
+    exec(open(f"{folder}/topic_modeling.py").read())
 elif page == "Classification":
-    classify.app()
+    exec(open(f"{folder}/classify.py").read())

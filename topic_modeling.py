@@ -12,15 +12,9 @@ from langchain_openai import ChatOpenAI
 import pandas as pd
 import time
 from datetime import datetime
-
-word_list_default = [
-    "apple", "computer", "banana", "laptop", "orange",
-    "smartphone", "grape", "tablet", "mango", "keyboard",
-    "pear", "mouse", "strawberry", "printer", "blueberry","monitor", "raspberry", "server", "peach", "router", "house"
-]
+from nlp_utils import (f_word_list, word_list_default)
 
 def gen_topics(word_list=word_list_default, num_topics=3, prompt_tail=''):
-#def gen_topics(word_list=["apple", "computer", "banana", "laptop", "orange"], num_topics=3, prompt_tail=''):
     ######################
     # Identify 3 topics each word may belong to, consolidate those into given number of main topics
     # prompt_tail is to append extra info at the end of the prompt generating the main topics, e.g. to avoid certain topic names
@@ -120,72 +114,46 @@ def gen_topics(word_list=word_list_default, num_topics=3, prompt_tail=''):
     #print('Consolidated ', len(list(analyses_str)), ' broad categories into ', len(topics), ' main topics')
     return topics
 
-def app():
+#def app():
 
-    st.title("Discover topics for list of words")
+st.title("Discover topics for list of words")
 
-    # Input method selection
-    input_method = st.sidebar.radio("Select input method:", ("Word List", "File"))
+# read in words
+word_list_df = f_word_list()
+if word_list_df.shape[0]>0:
 
-    word_list_df=pd.DataFrame()
-    word_list_default = [
-        "apple", "computer", "banana", "laptop", "orange", "smartphone",
-        "grape", "tablet", "mango", "keyboard", "pear", "mouse",
-        "strawberry", "printer", "blueberry", "monitor", "raspberry",
-        "server", "peach", "router", "house"
-    ]
-
-    if input_method == "Word List":
-        word_list_df=pd.DataFrame({'word': word_list_default})
-        st.session_state.results_df = None
-        # if word_list_input:
-        #     word_list = [word.strip() for word in word_list_input.replace(',', '\n').splitlines() if word.strip()]
+    # Add word selection options in sidebar
+    #st.sidebar.subheader("Word Selection")
+    selection_method = st.sidebar.radio(
+        "Select words by:",
+        ["First N words", "Random sample"]
+    )
+    
+    # Add input box for number of words to process
+    n_words = st.sidebar.number_input(
+        f"Words (max {word_list_df.shape[0]})",
+        min_value=1,
+        max_value=word_list_df.shape[0],
+        value=min(10, word_list_df.shape[0]),
+        step=1
+    )
+    
+    # Process words based on selection method
+    if selection_method == "Random sample":
+        #word_list_df_selected = word_list_df.sample(n=n_words, random_state=42)
+        word_list_df_selected = word_list_df.sample(n=n_words)
     else:
-        uploaded_file = st.sidebar.file_uploader("Upload file with one word per line:", type=["txt"])
-        if uploaded_file is not None:
-            try:
-                word_list_df = pd.read_csv(uploaded_file, names=['word'])
-            except Exception as e:
-                st.error(f"Error reading the file: {e}")
-        st.session_state.results_df = None
-        
-    if word_list_df.shape[0]>0:
+        word_list_df_selected = word_list_df.head(n_words)
 
-        # Add word selection options in sidebar
-        #st.sidebar.subheader("Word Selection")
-        selection_method = st.sidebar.radio(
-            "Select words by:",
-            ["First N words", "Random sample"]
-        )
-        
-        # Add input box for number of words to process
-        n_words = st.sidebar.number_input(
-            f"Words (max {word_list_df.shape[0]})",
-            min_value=1,
-            max_value=word_list_df.shape[0],
-            value=min(10, word_list_df.shape[0]),
-            step=1
-        )
-        
-        # Process words based on selection method
-        if selection_method == "Random sample":
-            #word_list_df_selected = word_list_df.sample(n=n_words, random_state=42)
-            word_list_df_selected = word_list_df.sample(n=n_words)
-        else:
-            word_list_df_selected = word_list_df.head(n_words)
+    editable_words = st.text_area("Words (comma-separated or one per line):", value='\n'.join(word_list_df_selected['word'].tolist()))
+    word_list_df_selected = pd.DataFrame({'word': editable_words.replace(',', '\n').split('\n')})
+    st.write(f"{word_list_df_selected.shape[0]} words")
 
-        word_list_input = st.text_area("Enter words (comma-separated or one per line):", value='\n'.join(word_list_df_selected['word'].tolist()))
-        if word_list_input:
-            word_list = [word.strip() for word in word_list_input.replace(',', '\n').splitlines() if word.strip()]
+    num_topics = st.sidebar.number_input("Number of Topics:", min_value=2, value=3)
+    prompt_tail = st.sidebar.text_input("Enter additional instructions for topic generation (e.g., 'Do not generate topics with food')", value='')
 
-        word_list_df_selected = pd.DataFrame({'word': word_list_input.split('\n')})
-        st.write(f"{word_list_df_selected.shape[0]} words")
-
-        num_topics = st.sidebar.number_input("Number of Topics:", min_value=2, value=3)
-        prompt_tail = st.sidebar.text_input("Enter additional instructions for topic generation (e.g., 'Do not generate topics with food')", value='')
-
-        # Run the selected clustering method
-        if st.sidebar.button("Go for it!"):
-            topic_list = gen_topics( word_list_df_selected['word'].tolist(), num_topics=num_topics, prompt_tail=prompt_tail )
-            topic_list_df = pd.DataFrame(topic_list, columns=['topics'])
-            st.write(topic_list_df)
+    # Run the selected clustering method
+    if st.sidebar.button("Go for it!"):
+        topic_list = gen_topics( word_list_df_selected['word'].tolist(), num_topics=num_topics, prompt_tail=prompt_tail )
+        topic_list_df = pd.DataFrame(topic_list, columns=['topics'])
+        st.write(topic_list_df)
