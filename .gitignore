@@ -200,3 +200,5 @@ cython_debug/
 .streamlit/
 =======
 >>>>>>> da796c1 (Initial commit)
+
+.codex

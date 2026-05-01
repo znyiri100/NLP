@@ -1,7 +1,7 @@
 import streamlit as st
 #from langchain.chains import LLMChain
-from langchain.prompts import ChatPromptTemplate
-from langchain.prompts import HumanMessagePromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import HumanMessagePromptTemplate
 from langchain_core.messages import SystemMessage, HumanMessage
 #from langchain.output_parsers import PydanticOutputParser
 #from pydantic import BaseModel, Field

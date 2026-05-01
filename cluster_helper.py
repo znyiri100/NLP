@@ -11,11 +11,9 @@ import random
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
-from langchain.chains import LLMChain
-from langchain.prompts import ChatPromptTemplate
-from langchain.prompts import HumanMessagePromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import HumanMessagePromptTemplate
 from langchain_core.messages import SystemMessage, HumanMessage
-from langchain.output_parsers import PydanticOutputParser
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
 

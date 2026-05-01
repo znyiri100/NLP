@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 from langchain_core.messages import SystemMessage
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
 from pydantic import BaseModel, Field
-from langchain.output_parsers import PydanticOutputParser
+from langchain_core.output_parsers import PydanticOutputParser
 import os, sys
 import time
 from datetime import datetime
